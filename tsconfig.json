@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",                       // Define a versão ECMAScript para o código gerado
+      "module": "CommonJS",                     // Usa o sistema de módulos CommonJS (adequado para Node.js)
+      "lib": ["ES2020"],                        // Especifica as bibliotecas de definição de tipo que o TypeScript deve incluir
+      "outDir": "./dist",                       // Define onde o código compilado será salvo
+      "rootDir": "./src",                       // Define o diretório raiz do seu código-fonte
+      "strict": true,                           // Habilita verificações rigorosas de tipo
+      "esModuleInterop": true,                  // Habilita interoperabilidade com módulos ES6
+      "skipLibCheck": true,                     // Ignora verificação de tipos em arquivos de definição de tipos
+      "forceConsistentCasingInFileNames": true,  // Garante que a diferenciação entre maiúsculas/minúsculas seja respeitada
+      "moduleResolution": "node",               // Especifica como o TypeScript resolve módulos
+      "resolveJsonModule": true,                // Habilita resolução de módulos JSON
+      "declaration": true,                     // Gera arquivos de declaração de tipo
+      "sourceMap": true,                        // Gera mapas de fonte
+      "removeComments": true,                   // Remove comentários do código gerado
+      "noUnusedLocals": true,                   // Evita a utilização de variáveis locais desnecessárias
+      "noUnusedParameters": true,               // Evita a utilização de parâmetros desnecessários
+      "noImplicitReturns": true,                // Evita a falta de retorno explícito em funções
+      "noFallthroughCasesInSwitch": true,       // Evita o uso de casos não tratados em switch
+      "types": ["node", "express", "cors", "jest"] // Define os tipos a serem incluídos
+    },
+    "include": ["src/**/*"],                         // Inclui os arquivos do diretório 'src'
+    "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]     // Exclui 'node_modules' e arquivos de teste
+  }
+  

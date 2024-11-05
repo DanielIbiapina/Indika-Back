@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid())
+  name              String
+  email             String   @unique
+  password          String
+  avatar            String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  rating            Float    @default(0)
+  isServiceProvider Boolean  @default(false)
+
+  // Relações
+  communities        Community[] @relation("CommunityMembers")
+  adminCommunities   Community[] @relation("CommunityAdmins")
+  createdCommunities Community[] @relation("CommunityCreator")
+  providedServices   Service[]
+  clientOrders       Order[]     @relation("ClientOrders")
+  providerOrders     Order[]     @relation("ProviderOrders")
+  givenReviews       Review[]    @relation("ReviewerRelation")
+  receivedReviews    Review[]    @relation("ReviewedRelation")
+}
+
+model Community {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  image       String?
+  categories  String[]
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relações
+  members   User[] @relation("CommunityMembers")
+  admins    User[] @relation("CommunityAdmins")
+  creator   User   @relation("CommunityCreator", fields: [creatorId], references: [id])
+  creatorId String
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  category    String
+  images      String[]
+  rating      Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Campos do preço
+  priceStartingAt Decimal
+  priceUnit       String // "hora", "serviço", "pessoa"
+
+  // Relações
+  provider   User     @relation(fields: [providerId], references: [id])
+  providerId String
+  orders     Order[]
+  reviews    Review[]
+}
+
+model Order {
+  id            String   @id @default(uuid())
+  status        String // "pending", "accepted", "in_progress", "completed", "cancelled"
+  price         Decimal
+  scheduledDate DateTime
+  description   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relações
+  service    Service @relation(fields: [serviceId], references: [id])
+  serviceId  String
+  client     User    @relation("ClientOrders", fields: [clientId], references: [id])
+  clientId   String
+  provider   User    @relation("ProviderOrders", fields: [providerId], references: [id])
+  providerId String
+  review     Review?
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Float
+  comment   String
+  createdAt DateTime @default(now())
+
+  // Relações
+  order      Order   @relation(fields: [orderId], references: [id])
+  orderId    String  @unique
+  reviewer   User    @relation("ReviewerRelation", fields: [reviewerId], references: [id])
+  reviewerId String
+  reviewed   User    @relation("ReviewedRelation", fields: [reviewedId], references: [id])
+  reviewedId String
+  service    Service @relation(fields: [serviceId], references: [id])
+  serviceId  String
+}
