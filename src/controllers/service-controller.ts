@@ -64,5 +64,60 @@ export class ServiceController {
     }
   };
 
+  public show = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const service = await this.serviceService.findById(id);
+
+      if (!service) {
+        return res.status(404).json({ message: "Serviço não encontrado" });
+      }
+
+      return res.json(service);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  };
+
+  public delete = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id; // Do middleware de autenticação
+
+      await this.serviceService.delete({
+        serviceId: id,
+        userId,
+      });
+
+      return res.status(204).send();
+    } catch (error) {
+      if (error.message === "Serviço não encontrado") {
+        return res.status(404).json({ message: error.message });
+      }
+      if (error.message === "Sem permissão para deletar este serviço") {
+        return res.status(403).json({ message: error.message });
+      }
+      return res.status(400).json({ message: error.message });
+    }
+  };
+
+  public getMyServices = async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      const { page = 1, limit = 10, status } = req.query;
+
+      const services = await this.serviceService.getServicesByProvider({
+        providerId: userId,
+        page: Number(page),
+        limit: Number(limit),
+        status: status as string,
+      });
+
+      return res.json(services);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  };
+
   // ... outros métodos do controller
 }

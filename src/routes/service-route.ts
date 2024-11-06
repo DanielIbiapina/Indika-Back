@@ -5,16 +5,19 @@ import { authMiddleware } from "../middlewares/auth-middleware";
 const router = Router();
 const serviceController = new ServiceController();
 
-// Rotas públicas
-router.get("/", serviceController.list);
+// Rotas públicas (ordem importa!)
 router.get("/search", serviceController.search);
 //router.get("/categories", serviceController.listCategories);
-//router.get("/:id", serviceController.show);
+router.get("/", serviceController.list);
 
-// Rotas protegidas
+// Rotas protegidas (ordem importa!)
 router.use(authMiddleware);
+router.get("/me", serviceController.getMyServices);
 router.post("/", serviceController.create);
-//router.put("/:id", serviceController.update);
-//router.delete("/:id", serviceController.delete);
+
+// Rota com parâmetro /:id (deve vir por último em cada grupo)
+router.get("/:id", serviceController.show); // público
+//router.put("/:id", serviceController.update); // protegido
+router.delete("/:id", serviceController.delete); // protegido
 
 export { router as serviceRouter };

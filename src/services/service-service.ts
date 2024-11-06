@@ -3,10 +3,11 @@ import { ServiceRepository } from "../repositories/service-repository";
 export class ServiceService {
   private serviceRepository: ServiceRepository;
   private readonly validCategories = [
-    "tecnologia",
-    "design",
-    "marketing",
-    "educação",
+    "Assistência Técnica",
+    "Reformas e Reparos",
+    "Eventos",
+    "Serviços Domésticos",
+    "Aulas",
     // ... outras categorias
   ];
 
@@ -31,7 +32,8 @@ export class ServiceService {
       throw new Error("O preço não pode ser negativo");
     }
 
-    if (!["hora", "serviço", "pessoa"].includes(data.priceUnit)) {
+    if (!["hora", "servico", "pessoa"].includes(data.priceUnit)) {
+      console.log(data.priceUnit);
       throw new Error("Unidade de preço inválida");
     }
 
@@ -95,6 +97,59 @@ export class ServiceService {
 
   public listCategories() {
     return this.validCategories;
+  }
+
+  public async findById(id: string) {
+    const service = await this.serviceRepository.findById(id);
+
+    if (!service) {
+      throw new Error("Serviço não encontrado");
+    }
+
+    return service;
+  }
+
+  public async delete(params: { serviceId: string; userId: string }) {
+    const service = await this.serviceRepository.findById(params.serviceId);
+
+    if (!service) {
+      throw new Error("Serviço não encontrado");
+    }
+
+    // Verifica se o usuário é o dono do serviço
+    if (service.providerId !== params.userId) {
+      throw new Error("Sem permissão para deletar este serviço");
+    }
+
+    // Verifica se há pedidos em andamento
+    const hasActiveOrders = await this.serviceRepository.hasActiveOrders(
+      params.serviceId
+    );
+    if (hasActiveOrders) {
+      throw new Error(
+        "Não é possível deletar um serviço com pedidos em andamento"
+      );
+    }
+
+    await this.serviceRepository.delete(params.serviceId);
+  }
+
+  public async getServicesByProvider(params: {
+    providerId: string;
+    page: number;
+    limit: number;
+    status?: string;
+  }) {
+    const skip = (params.page - 1) * params.limit;
+
+    const services = await this.serviceRepository.findManyByProvider({
+      providerId: params.providerId,
+      skip,
+      take: params.limit,
+      status: params.status,
+    });
+
+    return services;
   }
 
   // ... outros métodos do service
